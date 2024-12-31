@@ -62,8 +62,9 @@ if __name__ == "__main__":
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    params = []
     # Train model
-    model = train_model(X_train, y_train)
+    model = train_xgboost_regressor_model(params, X_train, y_train)
 
     # Evaluate model
     metrics = evaluate_model(model, X_test, y_test)

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 def load_data(file_path):
     """
@@ -19,8 +20,7 @@ def split_data(df, test_size=0.2, random_state=42):
     :param random_state: Random seed for reproducibility.
     :return: X_train, X_test, y_train, y_test
     """
-
-    return train_test_split(X, y, test_size=test_size, random_state=random_state)
+    # TODO
 
 def scale_features(X_train, X_test):
     """

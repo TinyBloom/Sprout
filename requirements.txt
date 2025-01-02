@@ -4,3 +4,11 @@ flask_marshmallow
 flask_migrate
 marshmallow-sqlalchemy
 celery[redis,redisbeat]
+
+# ML
+numpy
+pandas
+scikit-learn
+xgboost
+matplotlib
+matplotlib-inline

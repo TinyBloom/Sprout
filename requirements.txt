@@ -6,3 +6,11 @@ marshmallow-sqlalchemy
 celery[redis,redisbeat]
 pytest
 flask-testing
+
+# ML
+numpy
+pandas
+scikit-learn
+xgboost
+matplotlib
+matplotlib-inline

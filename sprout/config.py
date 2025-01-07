@@ -10,7 +10,7 @@ class Config:
     result_backend = 'redis://localhost:6379/0'
     beat_schedule = {
     'run-task-every-2-minutes': {
-        'task': 'celery_worker.scheduled_task',
+        'task': 'sprout.celery_worker.scheduled_task',
         'schedule': crontab(minute='*/2'),
     },
 }

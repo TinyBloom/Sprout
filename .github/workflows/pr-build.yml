@@ -38,9 +38,3 @@ jobs:
       run: |
         pip install pytest
         pytest || echo "No tests found"
-
-    # Step 6: 构建项目 (如果需要打包)
-    - name: Build the application
-      run: |
-        echo "Building application..."
-        python app.py  # 如果 app.py 是入口文件

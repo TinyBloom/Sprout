@@ -1,6 +1,6 @@
 import time
-from __init__ import celery
-from app import create_app
+from sprout import celery
+from sprout import create_app
 
 
 @celery.task(bind=True)

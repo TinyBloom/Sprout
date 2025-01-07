@@ -1,4 +1,4 @@
-from __init__ import create_app
+from sprout import create_app
 
 app = create_app()
 

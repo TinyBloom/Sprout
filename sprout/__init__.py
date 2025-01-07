@@ -2,10 +2,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
-from config import Config
-from extensions import db, ma, make_celery
-from routes import ai_bp
-from routes import job_bp
+from sprout.config import Config
+from sprout.extensions import db, ma, make_celery
+from sprout.routes import ai_bp, job_bp
 
 
 # migrate = Migrate()

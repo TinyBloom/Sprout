@@ -1,4 +1,4 @@
-from extensions import db
+from sprout.extensions import db
 from sqlalchemy.dialects.postgresql import JSON
 
 class Job(db.Model):

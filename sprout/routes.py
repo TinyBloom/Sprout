@@ -1,9 +1,9 @@
 import uuid
 
 from flask import Blueprint, request, jsonify
-from extensions import db
-from models import Job
-from schemas import JobSchema
+from sprout.extensions import db
+from sprout.models import Job
+from sprout.schemas import JobSchema
 
 job_schema = JobSchema()
 jobs_schema = JobSchema(many=True)

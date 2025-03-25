@@ -1,3 +1,5 @@
+import io
+import joblib
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -5,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 from joblib import dump, load
 import matplotlib.pyplot as plt
 from datetime import datetime
+
+from storage.storage import MinIOModelStorage
 
 def train_isolation_forest_model(file_path, n_estimators=100, contamination=0.01, random_state=42, model_filename=None):
     """
@@ -56,11 +60,22 @@ def train_isolation_forest_model(file_path, n_estimators=100, contamination=0.01
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         model_filename = f'isolation_forest_model_{timestamp}.joblib'
     
-    dump(isolation_forest, model_filename)
+    # dump(isolation_forest, model_filename)
+    model_buffer = io.BytesIO()
+    joblib.dump(isolation_forest, model_buffer)
     
     # Also save the scaler for future use
     scaler_filename = model_filename.replace('.joblib', '_scaler.joblib')
-    dump(scaler, scaler_filename)
+    # dump(scaler, scaler_filename)
+    model_scaler_buffer = io.BytesIO()
+    joblib.dump(scaler, model_scaler_buffer)
+    
+     # The destination bucket and filename on the MinIO server
+    bucket_name = "health"
+        
+    storage = MinIOModelStorage()
+    storage.upload_model(model_buffer,bucket_name, model_filename)
+    storage.upload_model(model_scaler_buffer,bucket_name, scaler_filename)
     
     print(f"Model saved to: {model_filename}")
     print(f"Scaler saved to: {scaler_filename}")
@@ -91,12 +106,10 @@ def predict_with_isolation_forest(model, data_array, scaler):
     array
         Array with shape (n_samples, 4), each row containing [torque, temperature, current, score]
     """
-    # Load the model if needed
-    if isinstance(model, str):
-        isolation_forest = load(model)
-    else:
-        isolation_forest = model
+    storage = MinIOModelStorage()
     
+    isolation_forest = joblib.load(storage.download_model("health", model))
+       
     # Convert input to numpy array
     X = np.array(data_array)
     
@@ -108,9 +121,8 @@ def predict_with_isolation_forest(model, data_array, scaler):
         raise ValueError("Input data must be a 1D array with [torque, temperature, current] or a 2D array with shape (n_samples, 3)")
     
     # Load and apply scaler
-    if isinstance(scaler, str):
-        scaler = load(scaler)
-    
+    scaler = joblib.load(storage.download_model("health", scaler))
+            
     X_scaled = scaler.transform(X)
     
     # Get binary anomaly predictions (-1 for anomalies, 1 for normal)
@@ -131,16 +143,16 @@ def predict_with_isolation_forest(model, data_array, scaler):
 
 # Example usage:
 if __name__ == "__main__":
-    file_path = '../../kuka_axis_run_info_1345880_202412231603.csv'
+    file_path = '../kuka_axis_run_info_1345880_202412231603.csv'
     result = train_isolation_forest_model(file_path)
     print(result)
-    # 读取字典中的字段
-    model = result['model']  # 训练好的IsolationForest模型
-    scaler = result['scaler']  # 标准化的Scaler对象
-    model_filename = result['model_filename']  # 模型保存的文件名
-    scaler_filename = result['scaler_filename']  # Scaler保存的文件名
+    
+    model = result['model']  
+    scaler = result['scaler'] 
+    model_filename = result['model_filename']  
+    scaler_filename = result['scaler_filename']  
 
-    # 输出字段信息
+    
     print("Model:", model)
     print("Scaler:", scaler)
     print("Model filename:", model_filename)

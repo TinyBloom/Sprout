@@ -16,3 +16,9 @@ python3 app.py
 celery -A sprout.celery_worker.celery worker --loglevel=info
 celery -A sprout.celery_worker.celery beat --loglevel=info
 ```
+
+Run the pgsql locally
+```
+docker-compose -f compose-pgsql.yaml up -d
+docker-compose -f compose-pgsql.yaml down -v
+```

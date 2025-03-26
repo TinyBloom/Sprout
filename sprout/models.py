@@ -19,7 +19,7 @@ class Model(db.Model):
     name = db.Column(db.String(255), nullable=False)
     robot_id = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
-    created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
+    created_at = db.Column(db.TIMESTAMP, default=datetime.now)
 
     training_info = db.relationship("TrainingInfo", back_populates="model", cascade="all, delete-orphan")
     model_files = db.relationship("ModelFile", back_populates="model", cascade="all, delete-orphan")
@@ -35,7 +35,7 @@ class TrainingInfo(db.Model):
     robot_id = db.Column(db.String(255), nullable=False)
     hyperparameter = db.Column(JSON, nullable=False)
     training_status = db.Column(db.String(48), default="pending")
-    created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
+    created_at = db.Column(db.TIMESTAMP, default=datetime.now)
     started_at = db.Column(db.TIMESTAMP)
     completed_at = db.Column(db.TIMESTAMP)
 
@@ -54,7 +54,7 @@ class ModelFile(db.Model):
     file_size = db.Column(db.BigInteger, nullable=False)
     file_format = db.Column(db.String(32), nullable=False)
     file_hash = db.Column(db.String(64), nullable=False)
-    created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
+    created_at = db.Column(db.TIMESTAMP, default=datetime.now)
 
     model = db.relationship("Model", back_populates="model_files")
 

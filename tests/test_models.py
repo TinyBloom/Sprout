@@ -80,6 +80,49 @@ def test_create_model_file(session):
     assert retrieved_file is not None
     assert retrieved_file.file_name == "model.pkl"
 
+def test_create_multiple_model_files(session):
+    """Test creating multiple ModelFiles and linking to a Model."""
+    model = Model(name="Test Model", robot_id="robot_123", description="Sample description")
+    session.add(model)
+    session.commit()
+
+    model_file1 = ModelFile(
+        model_id=model.model_id,
+        file_name="model1.pkl",
+        file_path="/models/model1.pkl",
+        file_size=1024,
+        file_format="pkl",
+        file_hash="abc123"
+    )
+
+    model_file2 = ModelFile(
+        model_id=model.model_id,
+        file_name="model2.pkl",
+        file_path="/models/model2.pkl",
+        file_size=1024,
+        file_format="pkl",
+        file_hash="abc123"
+    )
+
+    model_file3 = ModelFile(
+        model_id=model.model_id,
+        file_name="model3.pkl",
+        file_path="/models/model3.pkl",
+        file_size=1024,
+        file_format="pkl",
+        file_hash="abc123"
+    )
+
+    db.session.add_all([model_file1, model_file2, model_file3])
+    db.session.commit()
+
+    # Query files for the given model_id
+    files = ModelFile.query.filter_by(model_id=model.model_id).all()
+
+    # Assertions
+    assert len(files) == 3
+    assert {f.file_name for f in files} == {"model1.pkl", "model2.pkl", "model3.pkl"}
+
 def test_update_model(session):
     """Test updating a Model instance."""
     model = Model(name="Old Name", robot_id="robot_123", description="Old description")

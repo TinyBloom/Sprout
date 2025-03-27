@@ -24,9 +24,9 @@ CREATE TABLE model_files (
     model_id  VARCHAR(36) NOT NULL,
     file_name  VARCHAR(255) NOT NULL,
     file_path TEXT NOT NULL,  -- e.g.: minio://bucket_name/object_name or /local_path
-    file_size BIGINT NOT NULL,
-    file_format VARCHAR(32) NOT NULL,
-    file_hash  VARCHAR(64) NOT NULL,
+    file_size BIGINT,
+    file_format VARCHAR(32),
+    file_hash  VARCHAR(64),
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (model_id) REFERENCES models(model_id)
 );

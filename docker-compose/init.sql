@@ -23,6 +23,7 @@ CREATE TABLE model_files (
     file_id VARCHAR(36) PRIMARY KEY, -- 
     model_id  VARCHAR(36) NOT NULL,
     file_name  VARCHAR(255) NOT NULL,
+    file_type  VARCHAR(48), -- training_data, model, scaler
     file_path TEXT NOT NULL,  -- e.g.: minio://bucket_name/object_name or /local_path
     file_size BIGINT,
     file_format VARCHAR(32),

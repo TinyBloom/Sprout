@@ -50,6 +50,7 @@ class ModelFile(db.Model):
     file_id = db.Column(VARCHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     model_id = db.Column(VARCHAR(36), db.ForeignKey('models.model_id'), nullable=False)
     file_name = db.Column(db.String(255), nullable=False)
+    file_type = db.Column(db.String(48), default="training_data")
     file_path = db.Column(db.Text, nullable=False)
     file_size = db.Column(db.BigInteger, nullable=False)
     file_format = db.Column(db.String(32), nullable=False)

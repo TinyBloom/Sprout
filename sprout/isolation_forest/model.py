@@ -143,7 +143,7 @@ def predict_with_isolation_forest(model, data_array, scaler):
 
 # Example usage:
 if __name__ == "__main__":
-    file_path = '../kuka_axis_run_info_1345880_202412231603.csv'
+    file_path = '../../kuka_axis_run_info_1345880_202412231603.csv'
     result = train_isolation_forest_model(file_path)
     print(result)
     

@@ -37,6 +37,21 @@ services:
     networks:
       - sprout_network
 
+  sprout:
+    image: ghcr.io/tinybloom/sprout:0.2
+    container_name: sprout
+    environment:
+      DATABASE_URL: postgresql://sprout_admin:sprout_pwd@postgres:5432/sprout_model
+      MINIO_URI: minio:9000
+    ports:
+      - "5001:5001"
+    depends_on:
+      - minio
+      - postgres
+    networks:
+      - sprout_network
+
+
 volumes:
   pg_data:
 

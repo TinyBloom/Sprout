@@ -1,6 +1,6 @@
 import pytest
 from flask import Flask
-from sprout.models import db, Model, TrainingInfo, ModelFile
+from sprout.models import db, Model, TrainingInfo, ModelFile, Dataset
 import uuid
 
 @pytest.fixture
@@ -27,6 +27,16 @@ def session(app):
     with app.app_context():
         yield db.session
         db.session.rollback()  # Rollback any changes after each test
+
+def test_create_dataset(session):
+    """Test creating a DataSet instance."""
+    dataset = Dataset(robot_id="robot_123", file_path="minio://datasets/sample.csv")
+    session.add(dataset)
+    session.commit()
+
+    retrieved_ds = Dataset.query.filter_by(robot_id="robot_123").first()
+    assert retrieved_ds is not None
+    assert retrieved_ds.file_path == "minio://datasets/sample.csv"
 
 def test_create_model(session):
     """Test creating a Model instance."""

@@ -1,4 +1,12 @@
 
+CREATE TABLE datasets (
+    dataset_id VARCHAR(36) PRIMARY KEY,
+    file_path TEXT, -- minio://bucket_name/object_name
+    robot_id VARCHAR(255) NOT NULL,
+    status VARCHAR(48), -- pending, completed, deleted
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 CREATE TABLE models (
     model_id VARCHAR(36) PRIMARY KEY, -- 
     name VARCHAR(255) NOT NULL, -- e.g.: IsolationForest

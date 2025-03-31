@@ -12,6 +12,18 @@ class Job(db.Model):
     def __repr__(self):
         return f"<Job {self.job_id}>"
 
+class Dataset(db.Model):
+    __tablename__ = 'datasets'
+
+    dataset_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    file_path = db.Column(db.Text, nullable=False)
+    robot_id = db.Column(db.String(255), nullable=False)
+    status = db.Column(db.String(48), default="pending")
+    created_at = db.Column(db.TIMESTAMP, default=datetime.now)
+
+    def __repr__(self):
+        return f"<Dataset {self.file_path} - {self.status}>"
+
 class Model(db.Model):
     __tablename__ = 'models'
     

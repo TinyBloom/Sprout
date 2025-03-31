@@ -38,7 +38,7 @@ services:
       - sprout_network
 
   sprout:
-    image: ghcr.io/tinybloom/sprout:0.2
+    image: ghcr.io/tinybloom/sprout:0.3
     container_name: sprout
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}

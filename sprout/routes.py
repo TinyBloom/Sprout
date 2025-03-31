@@ -136,8 +136,9 @@ def predict():
     scaler_path = scaler.file_path.replace(BUCKET, "")
 
     predict_result = predict_with_isolation_forest(model_path, training_data, scaler_path)
+    filtered_data = [sublist[:3] + sublist[5:] for sublist in predict_result.tolist()]
     return jsonify({
-        'predict_result': predict_result.tolist(),
+        'predict_result': filtered_data,
     }), 202
 
 

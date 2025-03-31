@@ -21,9 +21,9 @@ services:
     container_name: sprout_postgres
     restart: always
     environment:
-      POSTGRES_USER: sprout_admin
-      POSTGRES_PASSWORD: sprout_pwd
-      POSTGRES_DB: sprout_model
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     command: >
@@ -41,7 +41,7 @@ services:
     image: ghcr.io/tinybloom/sprout:0.2
     container_name: sprout
     environment:
-      DATABASE_URL: postgresql://sprout_admin:sprout_pwd@postgres:5432/sprout_model
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       MINIO_URI: minio:9000
     ports:
       - "5001:5001"

@@ -63,8 +63,8 @@ class ExpiringMemory:
             shutil.rmtree(self.location)
             os.makedirs(self.location, exist_ok=True)
 
-# memory = Memory(location=Config.CACHE_PATH, verbose=3)
-memory = ExpiringMemory(location=Config.CACHE_PATH, expiration_days=0.0001, verbose=3)
+memory = Memory(location=Config.CACHE_PATH, verbose=3)
+# memory = ExpiringMemory(location=Config.CACHE_PATH, expiration_days=0.0001, verbose=3)
 
 @memory.cache
 def cached_loading(model_path):

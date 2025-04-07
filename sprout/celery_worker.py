@@ -31,8 +31,9 @@ def run_ai_job(self, job_id, params):
                 db.session.commit()
                 raise self.retry(exc=e)
 
+
 @celery.task
 def scheduled_task():
     print("Task executed!")
     # Todo: Calling the AI method in future.
-    return 'Task completed successfully'
+    return "Task completed successfully"

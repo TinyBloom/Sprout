@@ -8,10 +8,26 @@ docker-compose -f docker-compose/compose-full.yaml up
 
 ## API
 
+upload train resource:
+
+```sh
+curl -X POST -F "file=@{path}/kuka_axis_run_info_1227113_A1.csv" -F "robot_id=robot123" http://localhost:5001/api/ai/resource/upload
+```
+Response likes following:
+```sh
+{
+  "dataset_id": "65ebd59f-7333-4e48-a595-4b95a540ed61",
+  "file_path": "minio://health//65ebd59f-7333-4e48-a595-4b95a540ed61_kuka_axis_run_info_1227113_A1.csv",
+  "message": "File upload successful",
+  "robot_id": "robot123",
+  "success": true
+}
+```
+
 Calling train API to train a new model:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" http://127.0.0.1:5001/api/ai/train
+curl -X POST -H "Content-Type: application/json" http://127.0.0.1:5001/api/ai/train -d '{"file_path" : "minio://health//a458f67f-9d63-4188-a8b8-ced414bab928_kuka_axis_run_info_1227113_A1.csv", "features": ["torque", "temperature", "current"]}'
 ```
 
 Response likes following:

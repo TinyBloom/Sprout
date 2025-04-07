@@ -8,6 +8,7 @@ pytest
 flask-testing
 minio
 psycopg2-binary
+Werkzeug
 
 # ML
 numpy

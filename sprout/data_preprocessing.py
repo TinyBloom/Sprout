@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 
+
 def load_data(file_path):
     """
     Load dataset from a CSV file.
@@ -11,6 +12,7 @@ def load_data(file_path):
     :return: DataFrame
     """
     return pd.read_csv(file_path)
+
 
 def split_data(df, test_size=0.2, random_state=42):
     """
@@ -21,6 +23,7 @@ def split_data(df, test_size=0.2, random_state=42):
     :return: X_train, X_test, y_train, y_test
     """
     # TODO
+
 
 def scale_features(X_train, X_test):
     """
@@ -35,6 +38,7 @@ def scale_features(X_train, X_test):
 
     return X_train_scaled, X_test_scaled
 
+
 def create_sliding_window(data, window_size, base_column, additional_columns):
     """
     Create sliding windows for time series data.
@@ -47,7 +51,7 @@ def create_sliding_window(data, window_size, base_column, additional_columns):
     X, y = [], []
     for i in range(len(data) - window_size):
         # Extract window features
-        window = data[base_column].iloc[i:i + window_size].values
+        window = data[base_column].iloc[i : i + window_size].values
         additional_features = []
         for col in additional_columns:
             additional_features.append(data[col].iloc[i + window_size])
@@ -57,6 +61,7 @@ def create_sliding_window(data, window_size, base_column, additional_columns):
         # Target value
         y.append(data[base_column].iloc[i + window_size])
     return np.array(X), np.array(y)
+
 
 if __name__ == "__main__":
     # Example usage

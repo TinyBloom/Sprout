@@ -22,6 +22,11 @@ Run the pgsql locally
 docker-compose -f compose-pgsql.yaml up -d
 docker-compose -f compose-pgsql.yaml down -v
 ```
+Run the mini locally
+```
+docker-compose -f compose-minio.yaml up -d
+docker-compose -f compose-minio.yaml down -v
+```
 
 ## User guide
 [User Guide](doc/USER_GUIDE.md)

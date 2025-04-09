@@ -1,4 +1,3 @@
-
 import numpy as np
 import joblib
 from xgboost import XGBRegressor
@@ -13,7 +12,12 @@ def train_xgboost_regressor_model(params, X_train, y_train):
     :return: Trained model.
     """
     print(f"Params: {params}")
-    model = XGBRegressor(n_estimators=params['n_estimators'], learning_rate=params['lr'], max_depth=params['max_depth'], random_state=42)
+    model = XGBRegressor(
+        n_estimators=params["n_estimators"],
+        learning_rate=params["lr"],
+        max_depth=params["max_depth"],
+        random_state=42,
+    )
     model.fit(X_train, y_train)
     return model
 
@@ -60,7 +64,9 @@ if __name__ == "__main__":
     X, y = make_regression(n_samples=100, n_features=5, noise=0.1, random_state=42)
 
     # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
     params = []
     # Train model
@@ -71,6 +77,6 @@ if __name__ == "__main__":
     print("Evaluation Metrics:", metrics)
 
     # Save model
-    #save_model(model, "../models/linear_regression.pkl")
+    # save_model(model, "../models/linear_regression.pkl")
 
     print("Model training and evaluation completed.")

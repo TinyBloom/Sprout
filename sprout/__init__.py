@@ -9,6 +9,7 @@ from sprout.routes import ai_bp, job_bp
 
 # migrate = Migrate()
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -23,13 +24,14 @@ def create_app():
     migrate.init_app(app, db)
 
     # Register blueprints and routes
-    app.register_blueprint(job_bp, url_prefix='/api')
-    app.register_blueprint(ai_bp, url_prefix='/api')
+    app.register_blueprint(job_bp, url_prefix="/api")
+    app.register_blueprint(ai_bp, url_prefix="/api")
 
     with app.app_context():
         db.create_all()
 
     return app
 
+
 celery = make_celery(create_app())
-celery.conf.timezone = 'UTC'
+celery.conf.timezone = "UTC"

@@ -72,9 +72,22 @@ def train_isolation_forest_model(
         random_state=random_state,
     )
     isolation_forest.fit(X_scaled)
-
-    # 5. Save the model
+    
+     # 5. Save the model
     model_filename = stamp_filename(model_filename)
+    
+    # The destination bucket and filename on the MinIO server
+    bucket_name = "health"
+    
+    # Calculate anomaly scores (lower score = more anomalous)
+    scores = isolation_forest.decision_function(X_scaled)
+   
+    scores_filename = model_filename.replace(".joblib", "_scores.joblib")
+    scores_buffer = io.BytesIO()
+    joblib.dump(scores, scores_buffer)
+    
+    storage.upload_model(scores_buffer, bucket_name, scores_filename)
+   
 
     # dump(isolation_forest, model_filename)
     model_buffer = io.BytesIO()
@@ -84,9 +97,6 @@ def train_isolation_forest_model(
     # dump(scaler, scaler_filename)
     model_scaler_buffer = io.BytesIO()
     joblib.dump(scaler, model_scaler_buffer)
-
-    # The destination bucket and filename on the MinIO server
-    bucket_name = "health"
 
     storage.upload_model(model_buffer, bucket_name, model_filename)
     storage.upload_model(model_scaler_buffer, bucket_name, scaler_filename)
@@ -101,6 +111,7 @@ def train_isolation_forest_model(
 
     model_size, model_hash = get_model_info(bucket_name, model_filename)
     scaler_size, scaler_hash = get_model_info(bucket_name, scaler_filename)
+    scores_size, scores_hash = get_model_info(bucket_name, scores_filename)
     print(f"Model saved to: {model_filename}")
     print(f"Scaler saved to: {scaler_filename}")
 
@@ -113,6 +124,9 @@ def train_isolation_forest_model(
         "model_hash": model_hash,
         "scaler_size": scaler_size,
         "scaler_hash": scaler_hash,
+        "scores_filename": scores_filename,
+        "scores_size": scores_size,
+        "scores_hash": scores_hash
     }
 
 
@@ -123,7 +137,7 @@ def stamp_filename(model_filename):
     return model_filename
 
 
-def predict_with_isolation_forest(model, data_array, scaler):
+def predict_with_isolation_forest(model, data_array, scaler, scores_path):
     """
     Use a trained Isolation Forest model to detect anomalies in new data
 
@@ -167,10 +181,14 @@ def predict_with_isolation_forest(model, data_array, scaler):
 
     # Calculate anomaly scores (lower score = more anomalous)
     scores = isolation_forest.decision_function(X_scaled)
+    
 
+    base_scores = joblib.load(storage.download_model("health", scores_path))
+ 
     # Calculate health score percentage (0-100, higher = healthier)
-    min_score = scores.min()
-    max_score = scores.max()
+    min_score = base_scores.min()
+    max_score = base_scores.max()
+    
     health_score_percentage = (scores - min_score) / (max_score - min_score) * 100
 
     # Combine original features with anomaly scores and health percentage

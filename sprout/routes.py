@@ -243,12 +243,16 @@ def predict():
     scaler = ModelFile.query.filter_by(
         model_id=model_id_value, file_type="scaler"
     ).first()
+    scores = ModelFile.query.filter_by(
+        model_id=model_id_value, file_type="scores"
+    ).first()
     training_data = data.get("training_data")
     model_path = model.file_path.replace(BUCKET, "")
     scaler_path = scaler.file_path.replace(BUCKET, "")
-
+    scores_path = scores.file_path.replace(BUCKET, "")
+    
     predict_result = predict_with_isolation_forest(
-        model_path, training_data, scaler_path
+        model_path, training_data, scaler_path, scores_path
     )
     filtered_data = [sublist[:3] + sublist[5:] for sublist in predict_result.tolist()]
     return (
@@ -266,18 +270,25 @@ def train():
     """
     API endpoint to train model.
     """
-    # file_path = "./kuka_axis_run_info_1345880_202412231603.csv"
     data = request.get_json()
     file_path = data.get("file_path")
     features = data.get("features")
-    result = train_isolation_forest_model(BUCKET_NAME, file_path.replace(BUCKET, ""),features)
+    print(file_path)
+    
+    resource_file = file_path.replace(BUCKET, "")
+    result = train_isolation_forest_model(BUCKET_NAME, resource_file,features)
+    print("/ai/train")
+    print(result)
 
     model_filename = result["model_filename"]
     scaler_filename = result["scaler_filename"]
+    scores_filename = result["scores_filename"]
     model_size = result["model_size"]
     model_hash = result["model_hash"]
     scaler_size = result["scaler_size"]
     scaler_hash = result["scaler_hash"]
+    scores_size = result["scores_size"]
+    scores_hash = result["scores_hash"]
     # Only extract following params and save.
     keys_to_extract = {"contamination", "n_estimators", "random_state"}
     params = result["model"].get_params()
@@ -320,11 +331,24 @@ def train():
         file_hash=scaler_hash,
         created_at=datetime.now(),
     )
+    
+    file_path = BUCKET + scores_filename
+    new_scores_file = ModelFile(
+        model=new_model,
+        file_name=scores_filename,
+        file_type="scores",
+        file_path=file_path,
+        file_size=scores_size,
+        file_format="joblib",
+        file_hash=scores_hash,
+        created_at=datetime.now(),
+    )
 
     db.session.add(new_model)
     db.session.add(new_training)
     db.session.add(new_model_file)
     db.session.add(new_scaler_file)
+    db.session.add(new_scores_file)
     db.session.commit()
 
     return (

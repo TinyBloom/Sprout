@@ -123,6 +123,9 @@ def run_upload_file():
     if not robot_id:
         return jsonify({"success": False, "error": "Missing robot_id parameter"}), 400
 
+    # Get description
+    description = request.form.get("desc")
+
     if file and allowed_file(file.filename):
         try:
             filename = secure_filename(file.filename)
@@ -151,6 +154,7 @@ def run_upload_file():
                 dataset_id=dataset_id,
                 file_path=file_path,
                 robot_id=robot_id,
+                description=description,
                 status="Done",
             )
 
@@ -270,7 +274,30 @@ def train():
     API endpoint to train model.
     """
     data = request.get_json()
-    file_path = data.get("file_path")
+    dataset_id = data.get("dataset_id")
+    if not dataset_id:
+        return jsonify({"success": False, "error": "Missing dataset_id parameter"}), 400
+
+    # Get robot_id parameter
+    robot_id = data.get("robot_id")
+    if not robot_id:
+        return jsonify({"success": False, "error": "Missing robot_id parameter"}), 400
+
+    dataser_model = Dataset.query.filter_by(
+        dataset_id=dataset_id, robot_id=robot_id
+    ).first()
+    if not dataser_model:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Can't find dataset file, please check dataset_id and robot_id",
+                }
+            ),
+            400,
+        )
+
+    file_path = dataser_model.file_path
     features = data.get("features")
 
     resource_file = file_path.replace(BUCKET, "")
@@ -291,7 +318,7 @@ def train():
     filtered_params = {key: params[key] for key in keys_to_extract}
     new_model = Model(
         name="IsolationForest",
-        robot_id="robot_001",
+        robot_id=robot_id,
         description="One more model added",
         created_at=datetime.now(),
     )

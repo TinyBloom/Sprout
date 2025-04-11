@@ -33,7 +33,9 @@ services:
                -c 'maintenance_work_mem=64MB'
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/migrations:/migrations
+      - ./db/start-postgres.sh:/start-postgres.sh
     networks:
       - sprout_network
 

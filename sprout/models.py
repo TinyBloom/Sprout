@@ -24,6 +24,7 @@ class Dataset(db.Model):
     robot_id = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(48), default="pending")
     created_at = db.Column(db.TIMESTAMP, default=datetime.now)
+    description = db.Column(db.Text)
 
     def __repr__(self):
         return f"<Dataset {self.file_path} - {self.status}>"
@@ -39,6 +40,7 @@ class Model(db.Model):
     robot_id = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     created_at = db.Column(db.TIMESTAMP, default=datetime.now)
+    dataset_id = db.Column(db.String(36))
 
     training_info = db.relationship(
         "TrainingInfo", back_populates="model", cascade="all, delete-orphan"

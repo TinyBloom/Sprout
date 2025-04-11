@@ -1,0 +1,5 @@
+
+BEGIN;
+ALTER TABLE datasets ADD COLUMN description TEXT;
+ALTER TABLE models ADD COLUMN dataset_id VARCHAR(36);
+COMMIT;

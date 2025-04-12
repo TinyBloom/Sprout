@@ -4,13 +4,15 @@ CREATE TABLE datasets (
     file_path TEXT, -- minio://bucket_name/object_name
     robot_id VARCHAR(255) NOT NULL,
     status VARCHAR(48), -- pending, completed, deleted
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    -- description TEXT
 );
 
 CREATE TABLE models (
     model_id VARCHAR(36) PRIMARY KEY, -- 
     name VARCHAR(255) NOT NULL, -- e.g.: IsolationForest
     robot_id VARCHAR(255) NOT NULL,
+    -- dataset_id VARCHAR(36) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -40,9 +42,10 @@ CREATE TABLE model_files (
     FOREIGN KEY (model_id) REFERENCES models(model_id)
 );
 
+
 INSERT INTO models (model_id, name, robot_id, description)  
 VALUES 
-    ('03FA28A7-9B0F-4038-B1C9-3EDA235597D3', 'IsolationForest', 'robot_001', 'Anomaly detection model');
+    ('03FA28A7-9B0F-4038-B1C9-3EDA235597D3', 'IsolationForest', 'robot_001', 'dataset_id', 'Anomaly detection model');
 
 INSERT INTO training_info (training_id, model_id, robot_id, hyperparameter, training_status, started_at, completed_at)  
 VALUES 

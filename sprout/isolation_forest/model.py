@@ -11,6 +11,7 @@ from sprout.common.model_cache import cached_loading
 from sprout.storage.storage import MinIOModelStorage
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import RobustScaler
+from sprout.common.util import segment_mapping
 
 def train_isolation_forest_model(
     bucket,
@@ -198,22 +199,13 @@ def predict_with_isolation_forest(model, data_array, scaler, scores_path):
     # Scale the current scores and convert to percentage
     # Since RobustScaler does not scale data to a fixed range, additional processing is needed
     scaled_scores = robust_scaler.transform(scores.reshape(-1, 1)).flatten()
-    
+
     # Use MinMaxScaler to ensure the range is between 0 and 100
     min_max_scaler = MinMaxScaler(feature_range=(0, 100))
     min_max_scaler.fit(robust_scaler.transform(base_scores.reshape(-1, 1)))
     health_score_percentage = min_max_scaler.transform(scaled_scores.reshape(-1, 1)).flatten()
-
-    # Use sigmoid function to adjust the distribution
-    def adjusted_sigmoid(x, center=0.4, steepness=10):
-        """
-        Adjusted sigmoid function, which controls the center and steepness
-        center: The center point (0-1), the smaller it is, the higher the overall score
-        steepness: Steepness, the larger the value, the steeper the curve
-        """
-        return 100 / (1 + np.exp(-steepness * (x/100 - center)))
     
-    health_score_percentage = adjusted_sigmoid(health_score_percentage)
+    health_score_percentage = segment_mapping(health_score_percentage)
    
     # Combine original features with anomaly scores and health percentage
     result = np.column_stack([X, anomaly_labels, scores, health_score_percentage])

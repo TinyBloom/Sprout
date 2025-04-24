@@ -9,9 +9,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from sprout.common.model_cache import cached_loading
 from sprout.storage.storage import MinIOModelStorage
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import RobustScaler
-from sprout.common.util import segment_mapping
+from sprout.common.util import percentile_scoring
+
 
 def train_isolation_forest_model(
     bucket,
@@ -159,9 +158,8 @@ def predict_with_isolation_forest(model, data_array, scaler, scores_path):
         Array with shape (n_samples, 4), each row containing [torque, temperature, current, score]
     """
     storage = MinIOModelStorage()
-    # isolation_forest_model = storage.download_model("health", model)
+
     isolation_forest = cached_loading(model, storage)
-    # isolation_forest = joblib.load(storage.download_model("health", model))
 
     # Convert input to numpy array
     X = np.array(data_array)
@@ -187,26 +185,14 @@ def predict_with_isolation_forest(model, data_array, scaler, scores_path):
     # Calculate anomaly scores (lower score = more anomalous)
     scores = isolation_forest.decision_function(X_scaled)
 
+    print(scores)
+
     base_scores = cached_loading(scores_path, storage)
 
     # # Calculate health score percentage (0-100, higher = healthier)
-    
-    # Use RobustScaler to perform robust scaling on the base scores
-    # Initialize RobustScaler
-    robust_scaler = RobustScaler()
-    robust_scaler.fit(base_scores.reshape(-1, 1))
-    
-    # Scale the current scores and convert to percentage
-    # Since RobustScaler does not scale data to a fixed range, additional processing is needed
-    scaled_scores = robust_scaler.transform(scores.reshape(-1, 1)).flatten()
 
-    # Use MinMaxScaler to ensure the range is between 0 and 100
-    min_max_scaler = MinMaxScaler(feature_range=(0, 100))
-    min_max_scaler.fit(robust_scaler.transform(base_scores.reshape(-1, 1)))
-    health_score_percentage = min_max_scaler.transform(scaled_scores.reshape(-1, 1)).flatten()
-    
-    health_score_percentage = segment_mapping(health_score_percentage)
-   
+    health_score_percentage = percentile_scoring(scores, base_scores)
+
     # Combine original features with anomaly scores and health percentage
     result = np.column_stack([X, anomaly_labels, scores, health_score_percentage])
 

@@ -17,7 +17,7 @@ def train_isolation_forest_model(
     file_path,
     features,
     n_estimators=100,
-    contamination=0.0001,
+    contamination=0.0000573,
     random_state=42,
     model_filename=None,
 ):

@@ -2,15 +2,15 @@ import time
 from sprout import celery
 from sprout import create_app
 
+from sprout.extensions import db
+from sprout.models import Job
+
 
 @celery.task(bind=True)
 def run_ai_job(self, job_id, params):
     """
     Celery task for running AI-related jobs.
     """
-    from extensions import db
-    from models import Job
-
     app = create_app()
     with app.app_context():
         job = Job.query.get(job_id)

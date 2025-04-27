@@ -38,7 +38,9 @@ def allowed_file(filename):
 # Import Celery task inside the route function to avoid circular dependency
 @job_bp.route("/jobs", methods=["POST"])
 def create_job():
-    from celery_worker import execute_job  # Import here to prevent circular import
+    from sprout.celery_worker import (
+        execute_job,
+    )  # Import here to prevent circular import
 
     import time
 
@@ -201,7 +203,7 @@ def run_ai_task():
     """
     API Endpoint to trigger an AI task.
     """
-    from celery_worker import run_ai_job
+    from sprout.celery_worker import run_ai_job
 
     data = request.get_json()
     params = data.get("params", {})

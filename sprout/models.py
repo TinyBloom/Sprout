@@ -58,7 +58,7 @@ class Model(db.Model):
     )
     name = db.Column(db.String(255), nullable=False)
     robot_id = db.Column(db.String(255), nullable=False)
-    case_id = db.Column(db.String(255), db.ForeignKey("cases.case_id"))
+    case_id = db.Column(db.String(36), db.ForeignKey("cases.case_id"))
     description = db.Column(db.Text)
     created_at = db.Column(db.TIMESTAMP, default=datetime.now)
     dataset_id = db.Column(db.String(36))

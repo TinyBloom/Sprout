@@ -13,6 +13,26 @@ class Job(db.Model):
     def __repr__(self):
         return f"<Job {self.job_id}>"
 
+class Case(db.Model):
+    __tablename__ = "cases"
+
+    case_id = db.Column(
+        db.String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+
+    name = db.Column(db.String(255), nullable=False)
+    robot_id = db.Column(db.String(255), nullable=False)
+    case_type = db.Column(db.String(48), default="health_profile")
+    model_name = db.Column(db.String(48), default="IsolationForest")
+    description = db.Column(db.Text)
+    created_at = db.Column(db.TIMESTAMP, default=datetime.now)
+
+    models = db.relationship(
+        "Model", back_populates="case", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<Dataset {self.name}>"
 
 class Dataset(db.Model):
     __tablename__ = "datasets"
@@ -38,9 +58,12 @@ class Model(db.Model):
     )
     name = db.Column(db.String(255), nullable=False)
     robot_id = db.Column(db.String(255), nullable=False)
+    case_id = db.Column(db.String(255), db.ForeignKey("cases.case_id"))
     description = db.Column(db.Text)
     created_at = db.Column(db.TIMESTAMP, default=datetime.now)
     dataset_id = db.Column(db.String(36))
+
+    case = db.relationship("Case", back_populates="models")
 
     training_info = db.relationship(
         "TrainingInfo", back_populates="model", cascade="all, delete-orphan"

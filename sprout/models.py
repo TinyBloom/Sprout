@@ -32,7 +32,7 @@ class Case(db.Model):
     )
 
     def __repr__(self):
-        return f"<Dataset {self.name}>"
+        return f"<Case {self.name}>"
 
 class Dataset(db.Model):
     __tablename__ = "datasets"

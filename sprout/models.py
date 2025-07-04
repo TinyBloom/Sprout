@@ -31,6 +31,10 @@ class Case(db.Model):
         "Model", back_populates="case", cascade="all, delete-orphan"
     )
 
+    training_info = db.relationship(
+        "TrainingInfo", back_populates="case", cascade="all, delete-orphan"
+    )
+
     def __repr__(self):
         return f"<Case {self.name}>"
 
@@ -84,6 +88,7 @@ class TrainingInfo(db.Model):
     )
     model_id = db.Column(VARCHAR(36), db.ForeignKey("models.model_id"), nullable=False)
     robot_id = db.Column(db.String(255), nullable=False)
+    case_id = db.Column(db.String(36), db.ForeignKey("cases.case_id"))
     hyperparameter = db.Column(JSON, nullable=False)
     training_status = db.Column(db.String(48), default="pending")
     created_at = db.Column(db.TIMESTAMP, default=datetime.now)
@@ -91,6 +96,8 @@ class TrainingInfo(db.Model):
     completed_at = db.Column(db.TIMESTAMP)
 
     model = db.relationship("Model", back_populates="training_info")
+
+    case = db.relationship("Case", back_populates="training_info")
 
     def __repr__(self):
         return f"<TrainingInfo {self.training_id} - {self.training_status}>"
@@ -115,3 +122,20 @@ class ModelFile(db.Model):
 
     def __repr__(self):
         return f"<ModelFile {self.file_name}>"
+
+class HyperParameter(db.Model):
+    __tablename__ = "hyper_parameters"
+    param_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    model_name = db.Column(db.String(48), default="IsolationForest")
+    param_key = db.Column(db.String(48))
+
+    values = db.relationship("HyperParameterValue", back_populates="param", cascade="all, delete-orphan")
+
+
+class HyperParameterValue(db.Model):
+    __tablename__ = "hyper_parameter_values"
+    value_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    param_id = db.Column(db.String(36), db.ForeignKey("hyper_parameters.param_id"))
+    param_value = db.Column(db.String(255), nullable=False)
+
+    param = db.relationship("HyperParameter", back_populates="values")

@@ -125,15 +125,18 @@ class ModelFile(db.Model):
 
 class HyperParameter(db.Model):
     __tablename__ = "hyper_parameters"
+
     param_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     model_name = db.Column(db.String(48), default="IsolationForest")
     param_key = db.Column(db.String(48))
+    description = db.Column(db.Text)
 
     values = db.relationship("HyperParameterValue", back_populates="param", cascade="all, delete-orphan")
 
 
 class HyperParameterValue(db.Model):
     __tablename__ = "hyper_parameter_values"
+    
     value_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     param_id = db.Column(db.String(36), db.ForeignKey("hyper_parameters.param_id"))
     param_value = db.Column(db.String(255), nullable=False)

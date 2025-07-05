@@ -1,5 +1,6 @@
 import uuid
 import os
+import json
 from datetime import datetime
 
 from flask import Blueprint, request, jsonify
@@ -14,6 +15,7 @@ from sprout.isolation_forest.model import (
 from werkzeug.utils import secure_filename
 
 from sprout.storage.storage import MinIOModelStorage
+from sprout.isolation_forest.model_config import ModelConfig
 
 job_schema = JobSchema()
 jobs_schema = JobSchema(many=True)
@@ -285,6 +287,22 @@ def train():
     if not robot_id:
         return jsonify({"success": False, "error": "Missing robot_id parameter"}), 400
 
+    hyperparameter = data.get("hyperparameter")
+
+    if not hyperparameter:
+        hyperparameter = ModelConfig()
+    else:
+        try:
+            hyperparameter = ModelConfig.from_json(hyperparameter)
+
+        except (TypeError, ValueError) as e:
+            return (
+                jsonify(
+                    {"success": False, "error": f"Invalid model parameters: {str(e)}"}
+                ),
+                400,
+            )
+
     dataser_model = Dataset.query.filter_by(
         dataset_id=dataset_id, robot_id=robot_id
     ).first()
@@ -303,7 +321,14 @@ def train():
     features = data.get("features")
 
     resource_file = file_path.replace(BUCKET, "")
-    result = train_isolation_forest_model(BUCKET_NAME, resource_file, features)
+    result = train_isolation_forest_model(
+        BUCKET_NAME,
+        resource_file,
+        features,
+        hyperparameter.n_estimators,
+        hyperparameter.contamination,
+        hyperparameter.random_state,
+    )
 
     model_filename = result["model_filename"]
     scaler_filename = result["scaler_filename"]
@@ -314,10 +339,7 @@ def train():
     scaler_hash = result["scaler_hash"]
     scores_size = result["scores_size"]
     scores_hash = result["scores_hash"]
-    # Only extract following params and save.
-    keys_to_extract = {"contamination", "n_estimators", "random_state"}
-    params = result["model"].get_params()
-    filtered_params = {key: params[key] for key in keys_to_extract}
+
     new_model = Model(
         name="IsolationForest",
         robot_id=robot_id,
@@ -328,7 +350,7 @@ def train():
     new_training = TrainingInfo(
         model=new_model,
         robot_id=new_model.robot_id,
-        hyperparameter=filtered_params,
+        hyperparameter=hyperparameter.to_json(),
         training_status="complete",
         created_at=datetime.now(),
     )

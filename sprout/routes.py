@@ -16,6 +16,7 @@ from werkzeug.utils import secure_filename
 
 from sprout.storage.storage import MinIOModelStorage
 from sprout.isolation_forest.model_config import ModelConfig
+from sprout.isolation_forest.service import isolation_forest_service
 
 job_schema = JobSchema()
 jobs_schema = JobSchema(many=True)
@@ -278,6 +279,11 @@ def train():
     API endpoint to train model.
     """
     data = request.get_json()
+
+    model_type = data.get("model_type")
+    if not model_type:
+        return jsonify({"success": False, "error": "Missing model_type parameter"}), 400
+
     dataset_id = data.get("dataset_id")
     if not dataset_id:
         return jsonify({"success": False, "error": "Missing dataset_id parameter"}), 400
@@ -288,20 +294,6 @@ def train():
         return jsonify({"success": False, "error": "Missing robot_id parameter"}), 400
 
     hyperparameter = data.get("hyperparameter")
-
-    if not hyperparameter:
-        hyperparameter = ModelConfig()
-    else:
-        try:
-            hyperparameter = ModelConfig.from_json(hyperparameter)
-
-        except (TypeError, ValueError) as e:
-            return (
-                jsonify(
-                    {"success": False, "error": f"Invalid model parameters: {str(e)}"}
-                ),
-                400,
-            )
 
     dataser_model = Dataset.query.filter_by(
         dataset_id=dataset_id, robot_id=robot_id
@@ -321,92 +313,25 @@ def train():
     features = data.get("features")
 
     resource_file = file_path.replace(BUCKET, "")
-    result = train_isolation_forest_model(
-        BUCKET_NAME,
-        resource_file,
-        features,
-        hyperparameter.n_estimators,
-        hyperparameter.contamination,
-        hyperparameter.random_state,
-    )
 
-    model_filename = result["model_filename"]
-    scaler_filename = result["scaler_filename"]
-    scores_filename = result["scores_filename"]
-    model_size = result["model_size"]
-    model_hash = result["model_hash"]
-    scaler_size = result["scaler_size"]
-    scaler_hash = result["scaler_hash"]
-    scores_size = result["scores_size"]
-    scores_hash = result["scores_hash"]
-
-    new_model = Model(
-        name="IsolationForest",
-        robot_id=robot_id,
-        description="One more model added",
-        created_at=datetime.now(),
-    )
-
-    new_training = TrainingInfo(
-        model=new_model,
-        robot_id=new_model.robot_id,
-        hyperparameter=hyperparameter.to_json(),
-        training_status="complete",
-        created_at=datetime.now(),
-    )
-
-    file_path = BUCKET + model_filename
-    new_model_file = ModelFile(
-        model=new_model,
-        file_name=model_filename,
-        file_type="model",
-        file_path=file_path,
-        file_size=model_size,
-        file_format="joblib",
-        file_hash=model_hash,
-        created_at=datetime.now(),
-    )
-
-    file_path = BUCKET + scaler_filename
-    new_scaler_file = ModelFile(
-        model=new_model,
-        file_name=scaler_filename,
-        file_type="scaler",
-        file_path=file_path,
-        file_size=scaler_size,
-        file_format="joblib",
-        file_hash=scaler_hash,
-        created_at=datetime.now(),
-    )
-
-    file_path = BUCKET + scores_filename
-    new_scores_file = ModelFile(
-        model=new_model,
-        file_name=scores_filename,
-        file_type="scores",
-        file_path=file_path,
-        file_size=scores_size,
-        file_format="joblib",
-        file_hash=scores_hash,
-        created_at=datetime.now(),
-    )
-
-    db.session.add(new_model)
-    db.session.add(new_training)
-    db.session.add(new_model_file)
-    db.session.add(new_scaler_file)
-    db.session.add(new_scores_file)
-    db.session.commit()
-
-    return (
-        jsonify(
-            {
-                "train_result": "success",
-                "model_id": new_model.model_id,
-            }
-        ),
-        202,
-    )
+    if model_type == "isolation_forest":
+        result = isolation_forest_service(
+            resource_file, hyperparameter, features, robot_id
+        )
+        return (
+            jsonify({"train_result": "success", "model_id": result["model_id"]}),
+            202,
+        )
+    else:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "The system does not support this type of model.",
+                }
+            ),
+            400,
+        )
 
 
 # API used for test

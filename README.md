@@ -10,6 +10,11 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
+Apply migrations locally
+```
+flask db upgrade
+```
+
 Setup flask app and celery worker/beat
 ```sh
 python3 app.py

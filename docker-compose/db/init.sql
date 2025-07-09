@@ -5,14 +5,14 @@ CREATE TABLE datasets (
     robot_id VARCHAR(255) NOT NULL,
     status VARCHAR(48), -- pending, completed, deleted
     created_at TIMESTAMP DEFAULT NOW(),
-    -- description TEXT
+    description TEXT
 );
 
 CREATE TABLE models (
     model_id VARCHAR(36) PRIMARY KEY, -- 
     name VARCHAR(255) NOT NULL, -- e.g.: IsolationForest
     robot_id VARCHAR(255) NOT NULL,
-    -- dataset_id VARCHAR(36) NOT NULL,
+    dataset_id VARCHAR(36) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -43,7 +43,7 @@ CREATE TABLE model_files (
 );
 
 
-INSERT INTO models (model_id, name, robot_id, description)  
+INSERT INTO models (model_id, name, robot_id, dataset_id, description)
 VALUES 
     ('03FA28A7-9B0F-4038-B1C9-3EDA235597D3', 'IsolationForest', 'robot_001', 'dataset_id', 'Anomaly detection model');
 

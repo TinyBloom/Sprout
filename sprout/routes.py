@@ -343,6 +343,7 @@ def train():
     new_model = Model(
         name="IsolationForest",
         robot_id=robot_id,
+        dataset_id = dataset_id,
         description="One more model added",
         created_at=datetime.now(),
     )

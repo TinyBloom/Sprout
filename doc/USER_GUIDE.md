@@ -27,7 +27,7 @@ Response likes following:
 Calling train API to train a new model:
 
 ```sh
-curl -X POST -H "Content-Type: application/json" http://127.0.0.1:5001/api/ai/train -d '{"dataset_id": "65ebd59f-7333-4e48-a595-4b95a540ed61", "desc": "this is a file", "robot_id": "robot123", "features": ["torque", "temperature", "current"], "hyperparameter": "{\"n_estimators\": 100, \"contamination\": 0.0000573, \"random_state\": 42}"}' 
+curl -X POST -H "Content-Type: application/json" http://127.0.0.1:5001/api/ai/train -d '{"dataset_id": "0c2593ae-918a-4d0f-9cce-eef6db6ccf9e", "desc": "this is a file", "robot_id": "robot123456", "model_type": "isolation_forest", "features": ["torque", "temperature", "current"], "hyperparameter": "{\"n_estimators\": 100, \"contamination\": 0.0000573, \"random_state\": 42}"}' 
 
 ```
 

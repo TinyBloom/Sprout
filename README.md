@@ -35,3 +35,5 @@ docker-compose -f compose-minio.yaml down -v
 
 ## User guide
 [User Guide](doc/USER_GUIDE.md)
+
+Swagger UI is available at /docs, for example you can open http://127.0.0.1:5001/docs and try REST APIs there.

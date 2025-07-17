@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
-from flask_restful import Api
+from flask_restx import Api
+
 from flask_sqlalchemy import SQLAlchemy
 from sprout.config import Config
 from sprout.extensions import db, ma, make_celery
@@ -26,7 +27,14 @@ def create_app():
     app.register_blueprint(job_bp, url_prefix="/api")
     app.register_blueprint(ai_bp, url_prefix="/api")
 
-    api = Api(app)
+    # Initialize Flask-RESTx API
+    api = Api(
+        app,
+        version="0.1",
+        title="Project Sprout's API",
+        description="Sprout APIs",
+        doc="/docs"
+    )
 
     # Register endpoints
     api.add_resource(CaseListResource, '/api/cases')

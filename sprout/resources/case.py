@@ -1,7 +1,7 @@
-from flask_restx import abort, reqparse, Namespace, Resource
+from flask_restx import abort, reqparse, Resource
 from sprout import db
 from sprout.models import Case
-
+from sprout.routes import api_ns
 
 # Parser for incoming POST/PUT data
 case_parser = reqparse.RequestParser()
@@ -10,9 +10,6 @@ case_parser.add_argument("robot_id", type=str, required=True, help="robot_id is 
 case_parser.add_argument("case_type", type=str)
 case_parser.add_argument("model_name", type=str)
 case_parser.add_argument("description", type=str)
-
-# Create a namespace for /api
-api_ns = Namespace("api", description="API operations")
 
 
 @api_ns.route("/cases")
@@ -28,7 +25,7 @@ class CaseListResource(Resource):
         db.session.commit()
         return new_case.to_dict(), 201
 
-@api_ns.route("cases/<string:case_id>")
+@api_ns.route("/cases/<string:case_id>")
 class CaseResource(Resource):
     def get(self, case_id):
         case = Case.query.get(case_id)

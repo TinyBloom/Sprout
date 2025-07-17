@@ -4,23 +4,21 @@ import json
 from datetime import datetime
 
 from flask import Blueprint, request, jsonify
+from flask_restx import Namespace
 from minio import S3Error
+from werkzeug.utils import secure_filename
+
 from sprout import db
 from sprout.models import Dataset, Job, Model, ModelFile, TrainingInfo
-from sprout.schemas import JobSchema
 from sprout.isolation_forest.model import (
     predict_with_isolation_forest,
     train_isolation_forest_model,
 )
-from werkzeug.utils import secure_filename
-
 from sprout.storage.storage import MinIOModelStorage
 from sprout.isolation_forest.model_config import ModelConfig
 
-job_schema = JobSchema()
-jobs_schema = JobSchema(many=True)
+api_ns = Namespace("api", description="Sprout API namespace")
 
-job_bp = Blueprint("job_bp", __name__)
 ai_bp = Blueprint("ai_bp", __name__)
 
 UPLOAD_FOLDER = "/tmp/uploads"
@@ -35,70 +33,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-# Import Celery task inside the route function to avoid circular dependency
-@job_bp.route("/jobs", methods=["POST"])
-def create_job():
-    from sprout.celery_worker import (
-        execute_job,
-    )  # Import here to prevent circular import
-
-    import time
-
-    data = request.get_json()
-    job_id = f"job_{int(time.time())}"
-    new_job = Job(job_id=job_id, params=data.get("params", {}))
-    db.session.add(new_job)
-    db.session.commit()
-
-    # Trigger Celery task
-    execute_job.apply_async(args=[job_id, data.get("params", {})])
-
-    return jsonify({"message": "Job created", "job_id": job_id}), 201
-
-
-# Get all jobs
-@job_bp.route("/jobs", methods=["GET"])
-def get_jobs():
-    all_jobs = Job.query.all()
-    return jobs_schema.jsonify(all_jobs), 200
-
-
-# Get a single job by ID
-@job_bp.route("/jobs/<int:id>", methods=["GET"])
-def get_job(id):
-    job = Job.query.get_or_404(id)
-    return job_schema.jsonify(job), 200
-
-
-# Update a job
-@job_bp.route("/jobs/<int:id>", methods=["PUT"])
-def update_job(id):
-    job = Job.query.get_or_404(id)
-    data = request.get_json()
-    job.job_id = data.get("job_id", job.job_id)
-    job.params = data.get("params", job.params)
-    db.session.commit()
-    return job_schema.jsonify(job), 200
-
-
-# Delete a job
-@job_bp.route("/jobs/<int:id>", methods=["DELETE"])
-def delete_job(id):
-    job = Job.query.get_or_404(id)
-    db.session.delete(job)
-    db.session.commit()
-    return jsonify({"message": "Job deleted"}), 200
-
-
-# Check Job Status
-@job_bp.route("/jobs/<string:job_id>", methods=["GET"])
-def get_job_status(job_id):
-    job = Job.query.filter_by(job_id=job_id).first()
-    if not job:
-        return jsonify({"error": "Job not found"}), 404
-    return job_schema.jsonify(job), 200
 
 
 @ai_bp.route("/ai/resource/upload", methods=["POST"])

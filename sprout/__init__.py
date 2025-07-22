@@ -6,6 +6,11 @@ from sprout.config import Config
 from sprout.extensions import db, ma, make_celery
 from sprout.resources.case import CaseListResource, CaseResource  # noqa: F401
 from sprout.resources.job import JobListResource, JobResource  # noqa: F401
+from sprout.resources.ai import (
+    FileUploadResource,
+    PredictResource,
+    TrainResource,
+)  # noqa: F401
 from sprout.routes import ai_bp, api_ns
 
 
@@ -31,7 +36,7 @@ def create_app():
         version="0.1",
         title="Project Sprout's API",
         description="Sprout APIs",
-        doc="/docs"
+        doc="/docs",
     )
 
     # Register the /api namespace

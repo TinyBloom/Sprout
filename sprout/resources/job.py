@@ -8,12 +8,18 @@ from sprout.routes import api_ns
 
 # Parser for incoming POST data
 job_post_parser = reqparse.RequestParser()
-job_post_parser.add_argument("params", type=dict, required=False, help="Params must be a dictionary")
+job_post_parser.add_argument(
+    "params", type=dict, required=False, help="Params must be a dictionary"
+)
 
 # Parser for incoming PUT data
 job_put_parser = reqparse.RequestParser()
-job_put_parser.add_argument("job_id", type=str, required=True, help="Job ID is required")
-job_put_parser.add_argument("params", type=dict, required=False, help="Params must be a dictionary")
+job_put_parser.add_argument(
+    "job_id", type=str, required=True, help="Job ID is required"
+)
+job_put_parser.add_argument(
+    "params", type=dict, required=False, help="Params must be a dictionary"
+)
 
 
 @api_ns.route("/jobs")
@@ -23,6 +29,7 @@ class JobListResource(Resource):
         jobs = Job.query.all()
         return [job.to_dict() for job in jobs], 200
 
+    @api_ns.expect(job_post_parser)
     def post(self):
         """Create a new job"""
         from sprout.celery_worker import (
@@ -44,12 +51,13 @@ class JobListResource(Resource):
 @api_ns.route("/jobs/<int:job_id>")
 class JobResource(Resource):
     def get(self, job_id):
-        """Get a single job by ID"""
+        """Get a single job by job_id"""
         job = Job.query.get(job_id)
         if not job:
             abort(404, message="Job not found")
         return job.to_dict(), 200
 
+    @api_ns.expect(job_put_parser)
     def put(self, job_id):
         """Update a job"""
         job = Job.query.get(job_id)

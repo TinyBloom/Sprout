@@ -76,7 +76,7 @@ class Model(db.Model):
     case_id = db.Column(db.String(36), db.ForeignKey("cases.case_id"))
     description = db.Column(db.Text)
     created_at = db.Column(db.TIMESTAMP, default=datetime.now)
-    dataset_id = db.Column(db.String(36))
+    dataset_id = db.Column(db.String(36), db.ForeignKey("datasets.dataset_id"))
 
     case = db.relationship("Case", back_populates="models")
 
@@ -89,6 +89,17 @@ class Model(db.Model):
 
     def __repr__(self):
         return f"<Model {self.name}>"
+    
+    def to_dict(self):
+        return {
+            "model_id": self.model_id,
+            "name": self.name,
+            "robot_id": self.robot_id,
+            "case_id": self.case_id,
+            "description": self.description,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "dataset_id": self.dataset_id,
+        }
 
 
 class TrainingInfo(db.Model):
@@ -112,6 +123,19 @@ class TrainingInfo(db.Model):
 
     def __repr__(self):
         return f"<TrainingInfo {self.training_id} - {self.training_status}>"
+        
+    def to_dict(self):
+        return {
+            "training_id": self.training_id,
+            "model_id": self.model_id,
+            "robot_id": self.robot_id,
+            "case_id": self.case_id,
+            "hyperparameter": self.hyperparameter,
+            "training_status": self.training_status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None
+        }
 
 
 class ModelFile(db.Model):

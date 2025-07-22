@@ -6,6 +6,8 @@ from sprout.config import Config
 from sprout.extensions import db, ma, make_celery
 from sprout.resources.case import CaseListResource, CaseResource  # noqa: F401
 from sprout.resources.job import JobListResource, JobResource  # noqa: F401
+from sprout.resources.model import ModelListResource # noqa: F401
+from sprout.resources.training_info import  TrainingInfoListResource # noqa: F401
 from sprout.resources.ai import (
     FileUploadResource,
     PredictResource,

@@ -145,7 +145,6 @@ class FileUploadResource(Resource):
 train_request_model = api_ns.model(
     "TrainRequest",
     {
-        "case_id": fields.String(required=True, description="ID of the case"),
         "dataset_id": fields.String(required=True, description="ID of the dataset"),
         "robot_id": fields.String(
             required=True, description="ID of the robot associated with the training"
@@ -208,7 +207,10 @@ class TrainResource(Resource):
 
         case = Case.query.get(case_id)
         if not case:
-            abort(404, message="Case not found")
+            return {
+                "success": False,
+                "error": "Can't find the case, please check case id",
+            }, 400
 
         dataset_model = Dataset.query.filter_by(
             dataset_id=dataset_id, robot_id=robot_id
@@ -257,6 +259,7 @@ class TrainResource(Resource):
             hyperparameter=hyperparameter.to_json(),
             training_status="complete",
             created_at=datetime.now(),
+            case_id=case_id,
         )
 
         file_path = BUCKET + model_filename

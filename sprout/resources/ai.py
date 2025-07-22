@@ -15,7 +15,7 @@ from sprout.isolation_forest.model import (
     train_isolation_forest_model,
 )
 from sprout.isolation_forest.model_config import ModelConfig
-from sprout.models import Dataset, Job, Model, ModelFile, TrainingInfo
+from sprout.models import Dataset, Job, Model, ModelFile, TrainingInfo, Case
 from sprout.routes import api_ns
 from sprout.storage.storage import MinIOModelStorage
 
@@ -145,8 +145,22 @@ class FileUploadResource(Resource):
 train_request_model = api_ns.model(
     "TrainRequest",
     {
+        "case_id": fields.String(required=True, description="ID of the case"),
         "dataset_id": fields.String(required=True, description="ID of the dataset"),
-        "robot_id": fields.String(required=True, description="ID of the robot"),
+        "robot_id": fields.String(
+            required=True, description="ID of the robot associated with the training"
+        ),
+        "desc": fields.String(
+            required=False, description="Description of the training request"
+        ),
+        "case_id": fields.String(
+            required=True, description="ID of the case associated with the model"
+        ),
+        "features": fields.List(
+            fields.String,
+            required=True,
+            description="List of features to use for training",
+        ),
         "hyperparameter": fields.Raw(
             required=False, description="Optional hyperparameter configuration"
         ),
@@ -164,6 +178,11 @@ class TrainResource(Resource):
         API endpoint to train a model.
         """
         data = request.get_json()
+
+        case_id = data.get("case_id")
+        if not case_id:
+            return {"success": False, "error": "Missing case_id parameter"}, 400
+
         dataset_id = data.get("dataset_id")
         if not dataset_id:
             return {"success": False, "error": "Missing dataset_id parameter"}, 400
@@ -186,6 +205,10 @@ class TrainResource(Resource):
                     "success": False,
                     "error": f"Invalid model parameters: {str(e)}",
                 }, 400
+
+        case = Case.query.get(case_id)
+        if not case:
+            abort(404, message="Case not found")
 
         dataset_model = Dataset.query.filter_by(
             dataset_id=dataset_id, robot_id=robot_id
@@ -225,6 +248,7 @@ class TrainResource(Resource):
             description="One more model added",
             created_at=datetime.now(),
             dataset_id=dataset_id,
+            case_id=case_id,
         )
 
         new_training = TrainingInfo(
